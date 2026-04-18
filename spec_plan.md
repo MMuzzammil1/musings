@@ -31,7 +31,7 @@ sequenceDiagram
     participant PPL as last_pp_rank<br/>(PP-N-1)
 
     note over PP0: Hosts: embed + mtp_layer + lm_head<br/>+ target model (first PP shard)
-    note over PPL: Hosts: mtp_layer + lm_head<br/>+ target model (last PP shard)
+    note over PPL: Hosts: embed + mtp_layer + lm_head<br/>+ target model (last PP shard)
     note over PPn: Hosts: target model (middle PP shard)
 
     C->>PP0: Decode Request
