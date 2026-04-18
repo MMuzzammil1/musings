@@ -64,7 +64,7 @@ sequenceDiagram
 
     note over PPL: Draft Extend
     PPL->>PPL: forward_draft_extend_after_decode()
-    PPL-->>PP0: verify_metadata
+    PPL-->>PP0: PPProxyTensors(verify_metadata,...)
 
     note over PP0: Post-Process
     PP0->>PP0: _prep_batch_result()<br/>post_process_after_verify(verify_metadata)<br/>→ update request states, free KV-slots
