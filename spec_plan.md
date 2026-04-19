@@ -1,8 +1,3 @@
-### Checklist
-
-- [ ] If this is not a feature request but a general question, please start a discussion at https://github.com/sgl-project/sglang/discussions. Otherwise, it will be closed.
-- [ ] Please use English. Otherwise, it will be closed.
-
 ### Motivation
 
 I'd briefly share my plan of action on how we can support Speculative Decoding + PP in Disagg Decode Mode. Feel free to drop your comments/suggestions.
@@ -37,7 +32,8 @@ sequenceDiagram
     C->>PP0: Decode Request
 
     note over PP0: Draft Phase
-    PP0->>PP0: draft() → EagleDraftOutput
+    PP0->>PP0: set_kv_cache(kv_buffer, index_k_with_scale_buffer) <br/> received from last PP-N-1
+    PP0->>PP0: draft() → EagleDraftOutput<br/> (also includes the kv_buffer, index_k_with_scale_buffer values for new tokens populated)
 
     note over PP0: Tree Building
     PP0->>PP0: build_tree_kernel_efficient() → EagleVerifyInput
@@ -63,8 +59,9 @@ sequenceDiagram
     PPL->>PPL: verify() -> verify_metadata[accepted_tokens, pages_to_free,...]
 
     note over PPL: Draft Extend
-    PPL->>PPL: forward_draft_extend_after_decode()
-    PPL-->>PP0: PPProxyTensors(verify_metadata,...)
+    PPL->>PPL: set_kv_cache(kv_buffer, index_k_with_scale_buffer)
+    PPL->>PPL: forward_draft_extend_after_decode() -> EagleDraftOutput <br/> (kv_buffer, index_k_with_scale_buffer values,...)
+    PPL-->>PP0: PPProxyTensors(verify_metadata, EagleDraftOutput, ...)
 
     note over PP0: Post-Process
     PP0->>PP0: _prep_batch_result()<br/>post_process_after_verify(verify_metadata)<br/>→ update request states, free KV-slots
@@ -77,7 +74,4 @@ sequenceDiagram
 
 ## Concerns
 - Since `draft()` happens on first PP-rank and the `draft_extend_after_decode()` happens on last PP-rank, there is a necessity to pass `incremental KVCache` across PP-ranks -> Need some feedback on the feasibility of doing this.
-
-### Related resources
-
-_No response_
+- Performance: Would an implementation like this be performant or not. Need some feedback on this as well.
